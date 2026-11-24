@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>로파인더 (LawFinder) - 대한민국 법령·조례·규칙 통합 허브</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            },
+            court: {
+              50: '#f8fafc',
+              800: '#1e293b',
+              900: '#0f172a'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+    }
+    .dark .glass-card {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
+
+  <!-- 내비게이션 바 -->
+  <header class="sticky top-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-700 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+          <i data-lucide="scale" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <span class="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
+            로파인더 <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-semibold">LawFinder</span>
+          </span>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400">대한민국 모든 법령 · 조례 · 행정규칙 허브</p>
+        </div>
+      </div>
+
+      <!-- 우측 빠른 링크 및 다크모드 -->
+      <div class="flex items-center space-x-3">
+        <a href="#quick-ordinance" class="hidden sm:inline-flex text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+          지자체 조례
+        </a>
+        <a href="#law-hierarchy" class="hidden sm:inline-flex text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+          법령 체계도
+        </a>
+        <a href="#bookmark-section" class="text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1">
+          <i data-lucide="bookmark" class="w-3.5 h-3.5"></i>
+          <span>북마크 (<span id="bookmarkCount">0</span>)</span>
+        </a>
+        <button id="themeToggle" class="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none transition">
+          <i data-lucide="moon" id="moonIcon" class="w-5 h-5"></i>
+          <i data-lucide="sun" id="sunIcon" class="w-5 h-5 hidden"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 메인 컨텐츠 영역 -->
+  <main class="flex-grow">
+
+    <!-- 히어로 & 검색 섹션 -->
+    <section class="relative overflow-hidden bg-gradient-to-b from-blue-900 via-slate-900 to-slate-950 text-white pt-14 pb-20 px-4 sm:px-6 lg:px-8">
+      <!-- 배경 장식 -->
+      <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
+
+      <div class="relative max-w-4xl mx-auto text-center">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-medium mb-6 animate-pulse">
+          <i data-lucide="search-check" class="w-3.5 h-3.5"></i>
+          국가법령정보센터 · 자치법규정보시스템 통합 연동
+        </div>
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
+          법률부터 시·군·구 조례까지,<br class="hidden sm:inline"/>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-cyan-200 to-sky-400">
+            원하는 규칙을 한 곳에서 검색하세요
+          </span>
+        </h1>
+        <p class="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto mb-8">
+          법률, 대통령령, 시행규칙, 전국 243개 지자체 조례·규칙, 부처 훈령·예규·고시, 대법원 판례를 다이렉트로 연결합니다.
+        </p>
+
+        <!-- 통합 검색 폼 -->
+        <div class="bg-white/10 p-2 sm:p-3 rounded-2xl backdrop-blur-md border border-white/20 shadow-2xl">
+          <!-- 카테고리 탭 선택 -->
+          <div class="flex flex-wrap items-center justify-center gap-1.5 mb-3 text-xs font-medium" id="searchCategoryTabs">
+            <button type="button" data-cat="all" class="cat-tab px-3 py-1.5 rounded-lg bg-blue-600 text-white shadow-sm transition">
+              통합 전체
+            </button>
+            <button type="button" data-cat="law" class="cat-tab px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 transition">
+              법률/시행령/규칙
+            </button>
+            <button type="button" data-cat="ordinance" class="cat-tab px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 transition">
+              지자체 조례/규칙
+            </button>
+            <button type="button" data-cat="admin" class="cat-tab px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 transition">
+              행정규칙(고시/훈령)
+            </button>
+            <button type="button" data-cat="precedent" class="cat-tab px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 transition">
+              대법원 판례
+            </button>
+          </div>
+
+          <!-- 검색창 입력바 -->
+          <form id="searchForm" class="flex flex-col sm:flex-row gap-2">
+            <div class="relative flex-grow">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                <i data-lucide="search" class="w-5 h-5"></i>
+              </div>
+              <input 
+                type="text" 
+                id="searchKeyword" 
+                class="w-full pl-11 pr-4 py-3.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl border border-transparent focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base font-normal placeholder-slate-400 shadow-inner" 
+                placeholder="검색어 입력 (예: 도로교통법, 청년 조례, 주택임대차, 층간소음, 근로기준법)" 
+                required
+              />
+            </div>
+            <button 
+              type="submit" 
+              class="px-7 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 transition transform active:scale-95"
+            >
+              <span>법령 검색</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+          </form>
+
+          <!-- 인기 추천 검색어 -->
+          <div class="mt-3 flex flex-wrap items-center justify-center gap-2 text-[12px] text-slate-300">
+            <span class="text-slate-400 flex items-center gap-1"><i data-lucide="flame" class="w-3.5 h-3.5 text-orange-400"></i> 추천 검색:</span>
+            <button type="button" onclick="quickFill('주택임대차보호법', 'law')" class="hover:text-blue-300 underline decoration-slate-600">주택임대차보호법</button>
+            <button type="button" onclick="quickFill('도로교통법', 'law')" class="hover:text-blue-300 underline decoration-slate-600">도로교통법</button>
+            <button type="button" onclick="quickFill('근로기준법', 'law')" class="hover:text-blue-300 underline decoration-slate-600">근로기준법</button>
+            <button type="button" onclick="quickFill('청년 조례', 'ordinance')" class="hover:text-blue-300 underline decoration-slate-600">청년 기본조례</button>
+            <button type="button" onclick="quickFill('중대재해처벌법', 'law')" class="hover:text-blue-300 underline decoration-slate-600">중대재해처벌법</button>
+            <button type="button" onclick="quickFill('반려동물 조례', 'ordinance')" class="hover:text-blue-300 underline decoration-slate-600">반려동물 조례</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 빠른 서비스 바로가기 바 (공식 포털 링크 모음) -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <!-- 국가법령정보센터 -->
+        <a href="https://www.law.go.kr/" target="_blank" rel="noopener noreferrer" class="glass-card p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition flex items-center space-x-3 group">
+          <div class="p-2.5 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition">
+            <i data-lucide="landmark" class="w-5 h-5"></i>
+          </div>
+          <div class="min-w-0">
+            <h4 class="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1 truncate">
+              국가법령정보센터 <i data-lucide="external-link" class="w-3 h-3 opacity-60"></i>
+            </h4>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">법제처 공식 법률 포털</p>
+          </div>
+        </a>
+
+        <!-- 자치법규정보시스템 -->
+        <a href="https://www.elis.go.kr/" target="_blank" rel="noopener noreferrer" class="glass-card p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition flex items-center space-x-3 group">
+          <div class="p-2.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white transition">
+            <i data-lucide="map-pin" class="w-5 h-5"></i>
+          </div>
+          <div class="min-w-0">
+            <h4 class="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1 truncate">
+              자치법규정보시스템 <i data-lucide="external-link" class="w-3 h-3 opacity-60"></i>
+            </h4>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">전국 시·도·군·구 조례·규칙</p>
+          </div>
+        </a>
+
+        <!-- 대법원 종합법률정보 -->
+        <a href="https://glaw.scourt.go.kr/" target="_blank" rel="noopener noreferrer" class="glass-card p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition flex items-center space-x-3 group">
+          <div class="p-2.5 rounded-lg bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 group-hover:bg-purple-600 group-hover:text-white transition">
+            <i data-lucide="gavel" class="w-5 h-5"></i>
+          </div>
+          <div class="min-w-0">
+            <h4 class="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1 truncate">
+              대법원 판례정보 <i data-lucide="external-link" class="w-3 h-3 opacity-60"></i>
+            </h4>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">판례 · 헌법재판소 결정례</p>
+          </div>
+        </a>
+
+        <!-- 국회 의안정보시스템 -->
+        <a href="https://likms.assembly.go.kr/bill/main.do" target="_blank" rel="noopener noreferrer" class="glass-card p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition flex items-center space-x-3 group">
+          <div class="p-2.5 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 group-hover:bg-amber-600 group-hover:text-white transition">
+            <i data-lucide="file-text" class="w-5 h-5"></i>
+          </div>
+          <div class="min-w-0">
+            <h4 class="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1 truncate">
+              국회 의안정보시스템 <i data-lucide="external-link" class="w-3 h-3 opacity-60"></i>
+            </h4>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">발의 법안 및 입법예고</p>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- 섹션 1: 전국 17개 시·도 자치법규(조례·규칙) 빠른 찾기 -->
+    <section id="quick-ordinance" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-8">
+        <div>
+          <div class="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-xs font-bold tracking-wider uppercase mb-1">
+            <i data-lucide="building-2" class="w-4 h-4"></i> Local Ordinances & Regulations
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+            전국 17개 시·도 자치법규 (조례·규칙) 바로가기
+          </h2>
+          <p class="text-slate-600 dark:text-slate-400 text-xs sm:text-sm mt-1">
+            내가 거주하는 지역을 클릭하면 해당 시·도 및 관할 시·군·구의 최신 조례와 규칙을 즉시 열람할 수 있습니다.
+          </p>
+        </div>
+        <div class="mt-4 md:mt-0">
+          <span class="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 bg-slate-200/60 dark:bg-slate-800 px-3 py-1.5 rounded-lg">
+            <i data-lucide="info" class="w-3.5 h-3.5"></i>
+            행정안전부 자치법규시스템(ELIS) 연계
+          </span>
+        </div>
+      </div>
+
+      <!-- 시도 그리드 -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3" id="regionGrid">
+        <!-- JS로 동적 생성되거나 기본 렌더링 -->
+      </div>
+    </section>
+
+    <!-- 섹션 2: 분야별 핵심 법률 바로보기 & 북마크 -->
+    <section class="bg-slate-100/70 dark:bg-slate-900/50 py-16 border-y border-slate-200 dark:border-slate-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-2xl mx-auto mb-10">
+          <span class="text-blue-600 dark:text-blue-400 text-xs font-bold tracking-wider uppercase">Essential Laws</span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mt-1">
+            생활 & 업무 필수 기본 법령 모음
+          </h2>
+          <p class="text-slate-600 dark:text-slate-400 text-xs sm:text-sm mt-2">
+            자주 찾아보는 법령을 클릭하여 3단 비교(법-시행령-시행규칙)를 바로 확인하고 북마크에 추가하세요.
+          </p>
+        </div>
+
+        <!-- 탭 카테고리 -->
+        <div class="flex items-center justify-center flex-wrap gap-2 mb-8" id="lawCategoryTabs">
+          <button onclick="filterLawCards('daily')" class="law-filter-btn active px-4 py-2 rounded-xl text-xs font-semibold bg-blue-600 text-white shadow-sm transition">
+            민생 · 일상생활
+          </button>
+          <button onclick="filterLawCards('work')" class="law-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+            노동 · 고용 · 기업
+          </button>
+          <button onclick="filterLawCards('estate')" class="law-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+            부동산 · 건축 · 임대차
+          </button>
+          <button onclick="filterLawCards('basic')" class="law-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+            기본 6법 & 헌법
+          </button>
+        </div>
+
+        <!-- 법령 카드 목록 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="lawCardsContainer">
+          <!-- 카드들은 JavaScript로 렌더링 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 섹션 3: 법령 체계도 가이드 (법, 령, 규칙, 조례의 차이) -->
+    <section id="law-hierarchy" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <span class="text-blue-600 dark:text-blue-400 text-xs font-bold tracking-wider uppercase">Legal System Guide</span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mt-1">
+          법, 령, 규칙, 조례는 무엇이 다른가요?
+        </h2>
+        <p class="text-slate-600 dark:text-slate-400 text-xs sm:text-sm mt-2">
+          대한민국 법령체계의 위계구조(상위법 우선의 원칙)를 한눈에 쉽게 정리해드립니다.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-4 relative">
+        <!-- 1. 헌법 -->
+        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border-2 border-amber-400/50 dark:border-amber-500/30 shadow-md relative overflow-hidden flex flex-col justify-between">
+          <div class="absolute top-0 right-0 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg">최상위 규범</div>
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-3">
+              <i data-lucide="crown" class="w-5 h-5"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">1. 헌법 (Constitution)</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+              국가의 기본 권리와 통치조직 원리를 규정하는 <strong>국가 최고 규범</strong>입니다. 국민투표로 확정됩니다.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-amber-700 dark:text-amber-400 font-medium">
+            예: 대한민국 헌법
+          </div>
+        </div>
+
+        <!-- 2. 법률 -->
+        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3">
+              <i data-lucide="building-columns" class="w-5 h-5"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">2. 법률 (Act / Law)</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+              국민의 대표기관인 <strong>국회(의회)에서 의결</strong>하고 대통령이 공포하는 법규범입니다.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-blue-700 dark:text-blue-400 font-medium">
+            예: 민법, 형법, 도로교통법
+          </div>
+        </div>
+
+        <!-- 3. 명령 (시행령/시행규칙) -->
+        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-3">
+              <i data-lucide="stamp" class="w-5 h-5"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">3. 명령 (Decree/Rule)</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+              법률의 위임을 받아 <strong>대통령령(시행령)</strong> 및 <strong>총리령·부령(시행규칙)</strong>으로 구체적 세부사항을 정합니다.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-indigo-700 dark:text-indigo-400 font-medium">
+            예: 도로교통법 시행령·시행규칙
+          </div>
+        </div>
+
+        <!-- 4. 조례 -->
+        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border-2 border-emerald-400/50 dark:border-emerald-500/30 shadow-sm flex flex-col justify-between">
+          <div class="absolute top-0 right-0 bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg">지방자치 의회</div>
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3">
+              <i data-lucide="map" class="w-5 h-5"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">4. 조례 (Ordinance)</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+              <strong>지방의회(시·도의회, 구·군의회)에서 제정</strong>하는 자치법규로, 해당 지역 주민에게 적용됩니다.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-emerald-700 dark:text-emerald-400 font-medium">
+            예: 서울특별시 청년기본조례
+          </div>
+        </div>
+
+        <!-- 5. 규칙 / 행정규칙 -->
+        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 flex items-center justify-center mb-3">
+              <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">5. 규칙 및 훈령·고시</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+              <strong>지자체장(시장·도지사)이 제정하는 규칙</strong> 및 중앙행정기관의 <strong>고시·훈령·예규</strong> 등 행정규칙입니다.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-teal-700 dark:text-teal-400 font-medium">
+            예: 경기도 사무위임규칙, 복지부 고시
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 섹션 4: 내 북마크 (Local Storage) -->
+    <section id="bookmark-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+          <div class="flex items-center gap-3">
+            <div class="p-2 rounded-xl bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400">
+              <i data-lucide="bookmark-check" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-slate-900 dark:text-white">내 법령 북마크 보관함</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">자주 열람하는 법률 및 조례를 보관해두고 언제든 바로 이동하세요. (브라우저 자동저장)</p>
+            </div>
+          </div>
+          <button onclick="clearAllBookmarks()" class="text-xs text-slate-400 hover:text-red-500 transition flex items-center gap-1">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            <span>전체 비우기</span>
+          </button>
+        </div>
+
+        <div id="bookmarkList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-6">
+          <!-- 북마크 아이템 JS 동적 렌더링 -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 푸터 -->
+  <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-10 mt-12 text-slate-500 dark:text-slate-400 text-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div>
+        <p class="font-semibold text-slate-700 dark:text-slate-300">LawFinder (로파인더) - 대한민국 법령·조례 통합 안내 허브</p>
+        <p class="mt-1 text-[11px]">법제처 국가법령정보센터(law.go.kr) 및 행정안전부 자치법규정보시스템(elis.go.kr)의 공공정보를 기반으로 직접 연계됩니다.</p>
+      </div>
+      <div class="flex items-center gap-4 text-xs">
+        <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="hover:text-blue-500 flex items-center gap-1">
+          <i data-lucide="github" class="w-4 h-4"></i> GitHub 배포 지원
+        </a>
+        <span>·</span>
+        <span>Made for Public Accessibility</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 자바스크립트 로직 -->
+  <script>
+    // 1. 전국 17개 시도 데이터 정의
+    const REGIONS = [
+      { name: "서울특별시", short: "서울", code: "6110000", count: "조례·규칙 검색" },
+      { name: "경기도", short: "경기", code: "6410000", count: "조례·규칙 검색" },
+      { name: "부산광역시", short: "부산", code: "6260000", count: "조례·규칙 검색" },
+      { name: "인천광역시", short: "인천", code: "6280000", count: "조례·규칙 검색" },
+      { name: "대구광역시", short: "대구", code: "6270000", count: "조례·규칙 검색" },
+      { name: "광주광역시", short: "광주", code: "6290000", count: "조례·규칙 검색" },
+      { name: "대전광역시", short: "대전", code: "6300000", count: "조례·규칙 검색" },
+      { name: "울산광역시", short: "울산", code: "6310000", count: "조례·규칙 검색" },
+      { name: "세종특별자치시", short: "세종", code: "5690000", count: "조례·규칙 검색" },
+      { name: "강원특별자치도", short: "강원", code: "6530000", count: "조례·규칙 검색" },
+      { name: "충청북도", short: "충북", code: "6430000", count: "조례·규칙 검색" },
+      { name: "충청남도", short: "충남", code: "6440000", count: "조례·규칙 검색" },
+      { name: "전북특별자치도", short: "전북", code: "6540000", count: "조례·규칙 검색" },
+      { name: "전라남도", short: "전남", code: "6460000", count: "조례·규칙 검색" },
+      { name: "경상북도", short: "경북", code: "6470000", count: "조례·규칙 검색" },
+      { name: "경상남도", short: "경남", code: "6480000", count: "조례·규칙 검색" },
+      { name: "제주특별자치도", short: "제주", code: "6500000", count: "조례·규칙 검색" },
+      { name: "전국 조례 통합", short: "전국", code: "ALL", count: "통합 검색" }
+    ];
+
+    // 2. 추천 핵심 법률 데이터 목록
+    const CORE_LAWS = [
+      {
+        id: "law_housing",
+        category: "estate",
+        title: "주택임대차보호법",
+        desc: "전월세 계약 갱신권, 전세보증금 우선변제권 및 대항력 등 세입자 보호",
+        dept: "법무부 / 국토교통부",
+        lawUrl: "https://www.law.go.kr/법령/주택임대차보호법"
+      },
+      {
+        id: "law_traffic",
+        category: "daily",
+        title: "도로교통법",
+        desc: "음주운전, 속도제한, 보행자 보호, 어린이보호구역 등 도로 교통 안전 규율",
+        dept: "경찰청",
+        lawUrl: "https://www.law.go.kr/법령/도로교통법"
+      },
+      {
+        id: "law_labor",
+        category: "work",
+        title: "근로기준법",
+        desc: "최저근로조건, 주52시간제, 연차유급휴가, 퇴직금 및 부당해고 금지 규정",
+        dept: "고용노동부",
+        lawUrl: "https://www.law.go.kr/법령/근로기준법"
+      },
+      {
+        id: "law_privacy",
+        category: "daily",
+        title: "개인정보 보호법",
+        desc: "개인정보 수집, 이용, 제공, 파기 및 정보주체의 권리 보장",
+        dept: "개인정보보호위원회",
+        lawUrl: "https://www.law.go.kr/법령/개인정보보호법"
+      },
+      {
+        id: "law_serious",
+        category: "work",
+        title: "중대재해 처벌 등에 관한 법률",
+        desc: "사업주 및 경영책임자의 안전 및 보건 확보 의무 위반에 대한 형사책임",
+        dept: "고용노동부 / 법무부",
+        lawUrl: "https://www.law.go.kr/법령/중대재해처벌등에관한법률"
+      },
+      {
+        id: "law_civil",
+        category: "basic",
+        title: "민법",
+        desc: "사인 간의 재산권(계약, 소유권, 채권) 및 가족관계(혼인, 상속) 기본법",
+        dept: "법무부",
+        lawUrl: "https://www.law.go.kr/법령/민법"
+      },
+      {
+        id: "law_penal",
+        category: "basic",
+        title: "형법",
+        desc: "어떤 행위가 범죄이며 이에 대해 어떠한 형벌을 부과할 것인가를 규정",
+        dept: "법무부",
+        lawUrl: "https://www.law.go.kr/법령/형법"
+      },
+      {
+        id: "law_const",
+        category: "basic",
+        title: "대한민국헌법",
+        desc: "국민의 주권과 기본권 보장, 정부형태 및 국회·법원·헌재 기본원리",
+        dept: "국가최고법규",
+        lawUrl: "https://www.law.go.kr/법령/대한민국헌법"
+      },
+      {
+        id: "law_commerce",
+        category: "work",
+        title: "상법",
+        desc: "회사 설립, 주식회사 운영, 주주총회, 상행위 전반을 규율하는 법률",
+        dept: "법무부",
+        lawUrl: "https://www.law.go.kr/법령/상법"
+      },
+      {
+        id: "law_commercial_rent",
+        category: "estate",
+        title: "상가건물 임대차보호법",
+        desc: "상가 세입자의 계약갱신요구권(10년), 권리금 회수 기회 보호 및 임대료 상한선",
+        dept: "법무부 / 중소벤처기업부",
+        lawUrl: "https://www.law.go.kr/법령/상가건물임대차보호법"
+      },
+      {
+        id: "law_consumer",
+        category: "daily",
+        title: "소비자기본법",
+        desc: "소비자의 권익 증진, 물품 하자에 대한 보상 및 소비자분쟁해결기준의 근거",
+        dept: "공정거래위원회",
+        lawUrl: "https://www.law.go.kr/법령/소비자기본법"
+      },
+      {
+        id: "law_admin_basic",
+        category: "basic",
+        title: "행정기본법",
+        desc: "행정의 원칙(비례, 평등, 신뢰보호)과 인허가, 처분의 공통 기준을 규정",
+        dept: "법제처",
+        lawUrl: "https://www.law.go.kr/법령/행정기본법"
+      }
+    ];
+
+    // 현재 선택된 검색 카테고리
+    let currentCategory = 'all';
+
+    // 3. 지자체 그리드 렌더링
+    function renderRegions() {
+      const container = document.getElementById('regionGrid');
+      container.innerHTML = REGIONS.map(r => `
+        <div onclick="openRegionOrdinance('${r.short}', '${r.code}')" 
+             class="group cursor-pointer bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 rounded-xl p-3.5 text-center shadow-sm hover:shadow-md transition-all duration-150 transform hover:-translate-y-0.5">
+          <div class="text-xs font-bold text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 flex items-center justify-center gap-1">
+            <span>${r.name}</span>
+          </div>
+          <span class="inline-block mt-1 text-[11px] text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300">
+            ${r.count} &rarr;
+          </span>
+        </div>
+      `).join('');
+    }
+
+    // 시·도 클릭 시 자치법규 시스템으로 바로가기
+    function openRegionOrdinance(shortName, code) {
+      if (code === 'ALL') {
+        window.open('https://www.elis.go.kr/main/main.do', '_blank');
+      } else {
+        // 자치법규정보시스템 지역별 목록 바로가기
+        const targetUrl = `https://www.elis.go.kr/ordinsearch/ordinSearchList.do?orgCd=${code}`;
+        window.open(targetUrl, '_blank');
+      }
+    }
+
+    // 4. 핵심 법률 카드 렌더링
+    function renderLawCards(category = 'all') {
+      const container = document.getElementById('lawCardsContainer');
+      const filtered = category === 'all' ? CORE_LAWS : CORE_LAWS.filter(l => l.category === category);
+      
+      const bookmarks = getBookmarks();
+
+      container.innerHTML = filtered.map(law => {
+        const isBookmarked = bookmarks.some(b => b.id === law.id);
+        return `
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-start justify-between gap-2">
+                <span class="text-[11px] font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/40 px-2 py-0.5 rounded">
+                  ${law.dept}
+                </span>
+                <button onclick="toggleBookmark('${law.id}', '${law.title}', '${law.lawUrl}')" class="text-slate-400 hover:text-amber-500 transition p-1" title="북마크 토글">
+                  <i data-lucide="bookmark" class="w-4 h-4 ${isBookmarked ? 'fill-amber-400 text-amber-500' : ''}"></i>
+                </button>
+              </div>
+              <h3 class="text-base font-bold text-slate-900 dark:text-white mt-2">
+                ${law.title}
+              </h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                ${law.desc}
+              </p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <a href="${law.lawUrl}" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                <span>조문 전문 열람</span>
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+              </a>
+              <a href="https://www.law.go.kr/LSW/lsLinkProc.do?lsNm=${encodeURIComponent(law.title)}&chrClsCd=010202" target="_blank" rel="noopener noreferrer" class="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                3단비교(령·규칙)
+              </a>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function filterLawCards(cat) {
+      document.querySelectorAll('.law-filter-btn').forEach(btn => {
+        btn.classList.remove('active', 'bg-blue-600', 'text-white');
+        btn.classList.add('bg-white', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-300');
+      });
+      event.currentTarget.classList.add('active', 'bg-blue-600', 'text-white');
+      event.currentTarget.classList.remove('bg-white', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-300');
+      renderLawCards(cat);
+    }
+
+    // 5. 검색 실행 로직
+    document.getElementById('searchForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const query = document.getElementById('searchKeyword').value.trim();
+      if (!query) return;
+
+      executeSearch(query, currentCategory);
+    });
+
+    function executeSearch(query, cat) {
+      const encoded = encodeURIComponent(query);
+      let targetUrl = '';
+
+      switch (cat) {
+        case 'ordinance':
+          // 자치법규정보시스템 조례 검색
+          targetUrl = `https://www.elis.go.kr/ordinsearch/ordinSearchList.do?query=${encoded}`;
+          break;
+        case 'admin':
+          // 국가법령정보센터 행정규칙(훈령, 예규, 고시) 검색
+          targetUrl = `https://www.law.go.kr/admRulSc.do?menuId=5&subMenuId=41&tabMenuId=171&query=${encoded}`;
+          break;
+        case 'precedent':
+          // 대법원 판례 / 법제처 판례 통합 검색
+          targetUrl = `https://www.law.go.kr/precSc.do?menuId=7&subMenuId=47&tabMenuId=213&query=${encoded}`;
+          break;
+        case 'law':
+          // 법령(법률, 대통령령, 부령) 전용 검색
+          targetUrl = `https://www.law.go.kr/lsSc.do?menuId=1&subMenuId=15&tabMenuId=81&query=${encoded}`;
+          break;
+        case 'all':
+        default:
+          // 국가법령정보센터 통합 검색
+          targetUrl = `https://www.law.go.kr/DRF/lawSearch.do?target=law&query=${encoded}`;
+          break;
+      }
+
+      window.open(targetUrl, '_blank');
+    }
+
+    // 탭 카테고리 클릭 이벤트
+    document.querySelectorAll('#searchCategoryTabs .cat-tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('#searchCategoryTabs .cat-tab').forEach(t => {
+          t.classList.remove('bg-blue-600', 'text-white');
+          t.classList.add('bg-white/10', 'text-slate-200');
+        });
+        this.classList.add('bg-blue-600', 'text-white');
+        this.classList.remove('bg-white/10', 'text-slate-200');
+        currentCategory = this.getAttribute('data-cat');
+      });
+    });
+
+    function quickFill(keyword, cat) {
+      document.getElementById('searchKeyword').value = keyword;
+      // 해당 탭 활성화
+      const tab = document.querySelector(`#searchCategoryTabs button[data-cat="${cat}"]`);
+      if (tab) tab.click();
+      executeSearch(keyword, cat);
+    }
+
+    // 6. 북마크 로컬 스토리지 관리
+    function getBookmarks() {
+      try {
+        return JSON.parse(localStorage.getItem('law_bookmarks') || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveBookmarks(b) {
+      localStorage.setItem('law_bookmarks', JSON.stringify(b));
+      updateBookmarkUI();
+    }
+
+    function toggleBookmark(id, title, url) {
+      let b = getBookmarks();
+      const index = b.findIndex(item => item.id === id);
+      if (index >= 0) {
+        b.splice(index, 1);
+      } else {
+        b.push({ id, title, url, date: new Date().toLocaleDateString('ko-KR') });
+      }
+      saveBookmarks(b);
+      renderLawCards(document.querySelector('.law-filter-btn.active')?.dataset?.category || 'daily');
+    }
+
+    function clearAllBookmarks() {
+      if (confirm('저장된 북마크를 모두 삭제하시겠습니까?')) {
+        saveBookmarks([]);
+        renderLawCards();
+      }
+    }
+
+    function updateBookmarkUI() {
+      const b = getBookmarks();
+      document.getElementById('bookmarkCount').innerText = b.length;
+      const list = document.getElementById('bookmarkList');
+
+      if (b.length === 0) {
+        list.innerHTML = `
+          <div class="col-span-full py-8 text-center text-slate-400 text-xs">
+            아직 추가된 북마크가 없습니다. 위의 법률 카드에서 북마크 아이콘을 클릭해보세요.
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = b.map(item => `
+        <div class="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 flex items-center justify-between">
+          <div class="min-w-0 pr-2">
+            <a href="${item.url}" target="_blank" class="text-xs font-bold text-slate-900 dark:text-white hover:text-blue-500 truncate block">
+              ${item.title}
+            </a>
+            <span class="text-[10px] text-slate-400">등록일: ${item.date}</span>
+          </div>
+          <button onclick="toggleBookmark('${item.id}', '', '')" class="text-slate-400 hover:text-red-500 p-1">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    // 7. 다크모드 토글
+    const themeToggleBtn = document.getElementById('themeToggle');
+    const moonIcon = document.getElementById('moonIcon');
+    const sunIcon = document.getElementById('sunIcon');
+
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.classList.add('dark');
+      moonIcon.classList.add('hidden');
+      sunIcon.classList.remove('hidden');
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      const isDark = document.documentElement.classList.contains('dark');
+      if (isDark) {
+        moonIcon.classList.add('hidden');
+        sunIcon.classList.remove('hidden');
+      } else {
+        moonIcon.classList.remove('hidden');
+        sunIcon.classList.add('hidden');
+      }
+    });
+
+    // 초기화 실행
+    document.addEventListener('DOMContentLoaded', () => {
+      renderRegions();
+      renderLawCards('daily');
+      updateBookmarkUI();
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
